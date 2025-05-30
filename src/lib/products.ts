@@ -1,0 +1,77 @@
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  priceInSats: number;
+  category: string;
+  image: string;
+  downloadUrl?: string;
+  featured?: boolean;
+  tags: string[];
+}
+
+export const sampleProducts: Product[] = [
+  {
+    id: "ui-kit-1",
+    name: "Modern Dashboard UI Kit",
+    description: "Complete dashboard UI components with 50+ screens and dark/light themes.",
+    price: 24.99,
+    priceInSats: 41650,
+    category: "UI Kits",
+    image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=300&fit=crop&auto=format",
+    featured: true,
+    tags: ["dashboard", "admin", "react", "figma"]
+  },
+  {
+    id: "icon-pack-1",
+    name: "Lightning Icon Pack",
+    description: "500+ premium icons optimized for web and mobile applications.",
+    price: 9.99,
+    priceInSats: 16660,
+    category: "Icons",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=300&fit=crop&auto=format",
+    tags: ["icons", "svg", "web", "mobile"]
+  },
+  {
+    id: "photo-1",
+    name: "Workspace Stock Photo",
+    description: "High-resolution workspace photo perfect for landing pages and presentations.",
+    price: 2.99,
+    priceInSats: 4980,
+    category: "Photos",
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop&auto=format",
+    tags: ["workspace", "office", "business", "stock"]
+  },
+  {
+    id: "font-1",
+    name: "Geometric Sans Font Family",
+    description: "Modern geometric font family with 8 weights and italic variants.",
+    price: 19.99,
+    priceInSats: 33316,
+    category: "Fonts",
+    image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop&auto=format",
+    featured: true,
+    tags: ["typography", "geometric", "modern", "family"]
+  },
+  {
+    id: "template-1",
+    name: "Landing Page Template",
+    description: "Conversion-optimized landing page template built with React and Tailwind.",
+    price: 14.99,
+    priceInSats: 24983,
+    category: "Templates",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&auto=format",
+    tags: ["landing", "react", "tailwind", "conversion"]
+  },
+  {
+    id: "micro-1",
+    name: "Coffee Tip",
+    description: "Support the development with a small tip - like buying me a coffee!",
+    price: 0.50,
+    priceInSats: 833,
+    category: "Tips",
+    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop&auto=format",
+    tags: ["tip", "support", "coffee", "micro"]
+  }
+];
