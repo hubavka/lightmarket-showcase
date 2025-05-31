@@ -25,8 +25,20 @@ export default function PaymentButton({ product, className = "", disabled = fals
     setIsLoading(false);
   };
 
-  const handlePaymentCreated = (payment: { id: string; amount: number; metadata?: Record<string, unknown> }) => {
+  const handlePaymentCreated = (payment: { 
+    id: string; 
+    amount: number; 
+    metadata?: Record<string, unknown>;
+    invoice?: string;
+  }) => {
     console.log('Payment created:', payment);
+    console.log('Invoice details:', {
+      id: payment.id,
+      hasInvoice: !!payment.invoice,
+      invoiceLength: payment.invoice?.length,
+      invoicePrefix: payment.invoice?.substring(0, 20),
+      invoiceValid: payment.invoice?.startsWith('lnbc')
+    });
     setIsLoading(true);
   };
 

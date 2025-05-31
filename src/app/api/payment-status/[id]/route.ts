@@ -32,17 +32,8 @@ export async function GET(
     // Get payment status using NakaPay SDK
     const payment = await nakaPayClient.getPaymentRequest(id);
     
-    // Transform the response to match the expected format
-    const response = {
-      id: payment.id,
-      amount: payment.amount,
-      description: payment.description,
-      invoice: payment.invoice,
-      status: payment.status,
-      metadata: payment.metadata
-    };
-
-    return NextResponse.json(response);
+    // Return the raw response from NakaPay API (like sample app does)
+    return NextResponse.json(payment);
 
   } catch (error) {
     console.error('Payment status check error:', error);
