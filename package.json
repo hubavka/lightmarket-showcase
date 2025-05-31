@@ -19,7 +19,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "lucide-react": "^0.511.0",
-    "nakapay-react": "^0.4.0",
+    "nakapay-react": "^0.4.2",
     "nakapay-sdk": "^0.1.1",
     "next": "15.3.3",
     "react": "^19.0.0",
