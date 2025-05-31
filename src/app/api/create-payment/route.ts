@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { NakaPay } from "nakapay-sdk";
-import { debugInvoice } from "@/lib/invoice-utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,16 +47,16 @@ export async function POST(request: NextRequest) {
       status: payment.status
     });
 
-    // Debug the invoice format
+    // Just log basic info without validation
     if (payment.invoice) {
-      const invoiceValidation = debugInvoice(payment.invoice);
-      if (!invoiceValidation.isValid) {
-        console.error('Invalid invoice from NakaPay API:', invoiceValidation.errors);
-      }
+      console.log('Invoice created successfully:', {
+        length: payment.invoice.length,
+        prefix: payment.invoice.substring(0, 10),
+        isLightningInvoice: payment.invoice.startsWith('lnbc') || payment.invoice.startsWith('lntb')
+      });
     }
     
-    // Return the raw response from NakaPay API (like sample app does)
-    // Don't transform the response, let nakapay-react handle it as-is
+    // Return the raw response from NakaPay API
     return NextResponse.json(payment);
 
   } catch (error) {
