@@ -60,11 +60,14 @@ export async function POST(request: NextRequest) {
         
         // Here you would typically:
         // 1. Update your database with payment completion
-        // 2. Send confirmation email to customer
+        // 2. Send confirmation email to customer  
         // 3. Trigger product delivery (download links, etc.)
         // 4. Update inventory if needed
+        // 5. Notify connected clients via WebSocket/Server-Sent Events
         
-        // For demo purposes, just log the successful payment
+        // In a real app, you could notify the frontend immediately:
+        // await notifyClient(payment.id, 'completed');
+        
         break;
         
       case 'payment.failed':
