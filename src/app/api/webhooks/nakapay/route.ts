@@ -6,7 +6,14 @@ import Ably from "ably";
 const ably = new Ably.Rest(process.env.ABLY_API_KEY!);
 
 // Real-time notification function using Ably
-async function notifyPaymentUpdate(paymentId: string, data: any) {
+async function notifyPaymentUpdate(paymentId: string, data: {
+  event: string;
+  status?: string;
+  amount?: number;
+  description?: string;
+  metadata?: Record<string, unknown>;
+  reason?: string;
+}) {
   try {
     const channel = ably.channels.get(`payment-${paymentId}`);
     
