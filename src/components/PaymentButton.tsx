@@ -40,7 +40,7 @@ export default function PaymentButton({ product, className = "", disabled = fals
         priceUSD: product.price.toString(),
         category: product.category
       }}
-      apiEndpoint={process.env.NEXT_PUBLIC_NAKAPAY_API_URL || 'https://api.nakapay.app'}
+      apiEndpoint="/api/create-payment"
       text={isLoading ? 'Processing...' : `⚡ Pay ${product.priceInSats} sats`}
       className={`inline-flex items-center rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       disabled={disabled || isLoading}

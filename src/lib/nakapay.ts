@@ -1,42 +1,12 @@
-// import * as NakaPay from 'nakapay-sdk';
+import { NakaPay } from 'nakapay-sdk';
 
-// Try different import patterns to see which works
-// console.log('NakaPay module:', NakaPay);
-
-// Initialize NakaPay client with your API key - temporarily disabled
-// export const nakaPayClient = new (NakaPay as any).NakaPayClient({
-//   apiKey: process.env.NEXT_PUBLIC_NAKAPAY_API_KEY || 'c4c8a787-e59e-4c37-ad35-9d44db3ca42a',
-//   environment: (process.env.NEXT_PUBLIC_NAKAPAY_ENVIRONMENT as 'sandbox' | 'production') || 'production'
-// });
-
-// Temporary mock client for testing
-export const nakaPayClient = {
-  createPayment: async (params: {
-    amount: number;
-    description: string;
-    metadata: Record<string, unknown>;
-  }) => {
-    console.log('Mock payment creation:', params);
-    return {
-      id: 'payment_' + Date.now(),
-      amount: params.amount,
-      description: params.description,
-      metadata: params.metadata,
-      paymentUrl: `https://checkout.nakapay.app/payment_${Date.now()}`,
-      lightningInvoice: 'lnbc1500n1pdn...', // Mock invoice
-      status: 'pending'
-    };
-  },
-  getPayment: async (paymentId: string) => {
-    console.log('Mock payment status check:', paymentId);
-    return {
-      id: paymentId,
-      status: 'completed',
-      amount: 1000,
-      metadata: { productName: 'Test Product' }
-    };
+// Initialize NakaPay client with your API key
+export const nakaPayClient = new NakaPay(
+  process.env.NEXT_PUBLIC_NAKAPAY_API_KEY || 'c4c8a787-e59e-4c37-ad35-9d44db3ca42a',
+  {
+    baseUrl: process.env.NEXT_PUBLIC_NAKAPAY_API_URL || 'https://api.nakapay.app'
   }
-};
+);
 
 // Payment configuration
 export const paymentConfig = {
@@ -62,18 +32,26 @@ export async function createPayment(product: {
   status: string;
 }> {
   try {
-    const payment = await nakaPayClient.createPayment({
+    const payment = await nakaPayClient.createPaymentRequest({
       amount: product.priceInSats,
       description: `${product.name} - ${product.description}`,
+      destinationWallet: "excitingunity556470@getalby.com", // Configure this as needed
       metadata: {
         productId: product.id,
         productName: product.name,
         priceUSD: product.price.toString(),
       },
-      ...paymentConfig,
     });
     
-    return payment;
+    return {
+      id: payment.id,
+      amount: payment.amount,
+      description: payment.description,
+      metadata: payment.metadata || {},
+      paymentUrl: `https://lightmarket.nakapay.app/payment/success?paymentId=${payment.id}`,
+      lightningInvoice: payment.invoice,
+      status: payment.status,
+    };
   } catch (error) {
     console.error('Payment creation failed:', error);
     throw error;
@@ -83,8 +61,13 @@ export async function createPayment(product: {
 // Helper function to check payment status
 export async function checkPaymentStatus(paymentId: string) {
   try {
-    const payment = await nakaPayClient.getPayment(paymentId);
-    return payment;
+    const payment = await nakaPayClient.getPaymentRequest(paymentId);
+    return {
+      id: payment.id,
+      status: payment.status,
+      amount: payment.amount,
+      metadata: payment.metadata || {}
+    };
   } catch (error) {
     console.error('Payment status check failed:', error);
     throw error;
