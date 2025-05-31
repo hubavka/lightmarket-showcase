@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import ProductCard from "./ProductCard";
-import { sampleProducts, Product } from "@/lib/products";
+import { sampleProducts } from "@/lib/products";
 
 export default function ProductsSection() {
   const [selectedCategory, setSelectedCategory] = useState("All");

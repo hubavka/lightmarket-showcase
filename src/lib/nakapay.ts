@@ -11,7 +11,11 @@
 
 // Temporary mock client for testing
 export const nakaPayClient = {
-  createPayment: async (params: any) => {
+  createPayment: async (params: {
+    amount: number;
+    description: string;
+    metadata: Record<string, unknown>;
+  }) => {
     console.log('Mock payment creation:', params);
     return {
       id: 'payment_' + Date.now(),
@@ -48,7 +52,15 @@ export async function createPayment(product: {
   description: string;
   price: number;
   priceInSats: number;
-}) {
+}): Promise<{
+  id: string;
+  amount: number;
+  description: string;
+  metadata: Record<string, unknown>;
+  paymentUrl: string;
+  lightningInvoice: string;
+  status: string;
+}> {
   try {
     const payment = await nakaPayClient.createPayment({
       amount: product.priceInSats,

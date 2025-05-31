@@ -8,7 +8,11 @@ import { checkPaymentStatus } from "@/lib/nakapay";
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
-  const [paymentDetails, setPaymentDetails] = useState<any>(null);
+  const [paymentDetails, setPaymentDetails] = useState<{
+    id: string;
+    amount: number;
+    metadata?: { productName?: string };
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   
   const paymentId = searchParams.get('paymentId');

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { NakaPayButton } from "nakapay-react";
-import { Zap } from "lucide-react";
 import { Product } from "@/lib/products";
 
 interface PaymentButtonProps {
@@ -14,7 +13,7 @@ interface PaymentButtonProps {
 export default function PaymentButton({ product, className = "", disabled = false }: PaymentButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handlePaymentSuccess = (payment: any) => {
+  const handlePaymentSuccess = (payment: { id: string; amount: number; metadata?: Record<string, unknown> }) => {
     console.log('Payment successful! Payment:', payment);
     alert(`🎉 Payment Successful!\n\nPayment ID: ${payment.id}\nProduct: ${product.name}\n\nYour digital product is ready for download!`);
     setIsLoading(false);
@@ -26,7 +25,7 @@ export default function PaymentButton({ product, className = "", disabled = fals
     setIsLoading(false);
   };
 
-  const handlePaymentCreated = (payment: any) => {
+  const handlePaymentCreated = (payment: { id: string; amount: number; metadata?: Record<string, unknown> }) => {
     console.log('Payment created:', payment);
     setIsLoading(true);
   };

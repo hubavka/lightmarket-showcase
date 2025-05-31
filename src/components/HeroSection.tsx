@@ -6,9 +6,9 @@ export default function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-orange-50 py-20">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className="absolute inset-0 opacity-5"></div>
       
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 relative z-10">
         <div className="mx-auto max-w-4xl text-center">
           {/* Badge */}
           <div className="mb-6 inline-flex items-center rounded-full bg-orange-100 px-4 py-2 text-sm font-medium text-orange-800">
@@ -53,8 +53,22 @@ export default function HeroSection() {
           
           {/* CTA Button */}
           <button 
-            onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-            className="inline-flex items-center rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:scale-105"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Button clicked!'); // Debug log
+              const productsSection = document.getElementById('products');
+              console.log('Products section found:', productsSection); // Debug log
+              if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                // Fallback scroll
+                window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+            className="inline-flex items-center rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:scale-105 relative z-20"
           >
             Start Shopping
             <ArrowRight className="ml-2 h-5 w-5" />

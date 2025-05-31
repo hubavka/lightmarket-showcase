@@ -1,10 +1,8 @@
 "use client";
 
-import { Zap, ShoppingBag, Github, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Zap } from "lucide-react";
 
 export default function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">

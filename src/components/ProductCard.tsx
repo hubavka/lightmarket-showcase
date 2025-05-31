@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Zap, Download, Star, Tag } from "lucide-react";
+import { Star, Tag, Zap } from "lucide-react";
 import { Product } from "@/lib/products";
 import { formatPrice, formatSats } from "@/lib/utils";
 import PaymentButton from "./PaymentButton";
@@ -24,6 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       
       {/* Product image */}
       <div className="relative h-48 overflow-hidden bg-gray-100">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
           src={product.image} 
           alt={product.name}
