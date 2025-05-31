@@ -107,3 +107,111 @@ For production, prioritize webhooks because:
 1. **Development**: Use polling for simplicity
 2. **Staging**: Test webhook reliability
 3. **Production**: Webhook-first with polling fallback
+
+#### 1. Webhook Server
+```bash
+# Deploy webhook server separately (recommended)
+# Use pm2, docker, or cloud functions
+pm2 start webhook-server.js --name "nakapay-webhooks"
+```
+
+#### 2. Update Webhook URLs
+```bash
+# Production webhook URL
+https://your-domain.com/api/webhooks/nakapay
+
+# Or separate webhook service
+https://webhooks.your-domain.com/webhook
+```
+
+#### 3. WebSocket Configuration
+```typescript
+// Update webhook URL for production
+<NakaPayButton
+  useWebhooks={true}
+  webhookUrl="wss://webhooks.your-domain.com"  // WSS for production
+  // ... other props
+/>
+```
+
+### 🔄 Migration Guide
+
+If you're upgrading from nakapay-react v0.1.0:
+
+1. **Update package.json**
+```bash
+npm install nakapay-react@^0.2.0
+```
+
+2. **Add webhook server dependencies**
+```bash
+npm install express socket.io cors body-parser dotenv
+```
+
+3. **Enable webhooks in your component**
+```typescript
+// Add these props to existing NakaPayButton
+useWebhooks={true}
+webhookUrl="ws://localhost:3002"
+```
+
+4. **Start webhook server**
+```bash
+npm run webhook
+```
+
+### 💡 Best Practices
+
+#### Development
+- Use webhook server locally: `npm run webhook`
+- Test both webhook and fallback polling scenarios
+- Monitor console logs for payment events
+
+#### Production
+- Deploy webhook server with high availability
+- Use WSS (secure WebSocket) connections
+- Implement webhook signature verification
+- Add retry logic for failed webhook deliveries
+- Monitor webhook endpoint health
+
+### 🐛 Troubleshooting
+
+#### QR Code Not Showing
+```typescript
+// Check if qrcode.react is installed
+npm list qrcode.react
+
+// Verify invoice format
+console.log('Invoice:', payment.invoice);
+console.log('Valid Lightning invoice:', payment.invoice.startsWith('lnbc'));
+```
+
+#### Webhooks Not Working
+```bash
+# Check webhook server is running
+curl http://localhost:3002/health
+
+# Verify WebSocket connection
+# Browser console should show: "NakaPay: Connected to WebSocket server"
+
+# Check NakaPay webhook configuration
+# Webhook URL must be publicly accessible for production
+```
+
+#### Fallback to Polling
+If webhooks fail, the component automatically falls back to polling:
+```typescript
+// Component logs will show:
+"NakaPay: Using polling for payment status (webhooks disabled)"
+```
+
+### 🎉 Summary
+
+With nakapay-react v0.2.0, you get:
+- ✅ Reliable client-side QR code generation
+- ✅ Real-time payment updates via webhooks
+- ✅ Automatic fallback to polling if needed
+- ✅ Better performance and user experience
+- ✅ Production-ready webhook infrastructure
+
+The demo now showcases a production-ready payment flow that scales efficiently!

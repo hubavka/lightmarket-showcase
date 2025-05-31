@@ -56,6 +56,8 @@ export default function PaymentButton({ product, className = "", disabled = fals
       text={isLoading ? 'Processing...' : `⚡ Pay ${product.priceInSats} sats`}
       className={`inline-flex items-center rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       disabled={disabled || isLoading}
+      useAbly={true}
+      ablyApiKey={process.env.NEXT_PUBLIC_ABLY_API_KEY}
       onPaymentCreated={handlePaymentCreated}
       onPaymentSuccess={handlePaymentSuccess}
       onPaymentError={handlePaymentError}

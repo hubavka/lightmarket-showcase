@@ -1,5 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import Ably from "ably";
+
+// Initialize Ably client
+const ably = new Ably.Rest(process.env.ABLY_API_KEY!);
+
+// Real-time notification function using Ably
+async function notifyPaymentUpdate(paymentId: string, data: any) {
+  try {
+    const channel = ably.channels.get(`payment-${paymentId}`);
+    
+    await channel.publish('payment-update', {
+      paymentId,
+      ...data,
+      timestamp: Date.now()
+    });
+    
+    console.log(`📡 Sent Ably notification for payment ${paymentId}:`, data);
+  } catch (error) {
+    console.error('Failed to send Ably notification:', error);
+  }
+}
 
 // Verify webhook signature
 function verifyWebhookSignature(
@@ -58,15 +79,20 @@ export async function POST(request: NextRequest) {
         console.log(`Amount: ${payment.amount} sats`);
         console.log(`Product: ${payment.metadata?.productName || 'Unknown'}`);
         
+        // Notify connected clients about payment completion
+        await notifyPaymentUpdate(payment.id, {
+          event: 'payment.completed',
+          status: 'completed',
+          amount: payment.amount,
+          description: payment.description,
+          metadata: payment.metadata
+        });
+        
         // Here you would typically:
         // 1. Update your database with payment completion
         // 2. Send confirmation email to customer  
         // 3. Trigger product delivery (download links, etc.)
         // 4. Update inventory if needed
-        // 5. Notify connected clients via WebSocket/Server-Sent Events
-        
-        // In a real app, you could notify the frontend immediately:
-        // await notifyClient(payment.id, 'completed');
         
         break;
         
@@ -74,8 +100,12 @@ export async function POST(request: NextRequest) {
         console.log(`❌ Payment failed: ${payment.id}`);
         console.log(`Reason: ${payment.failureReason || 'Unknown'}`);
         
-        // Handle failed payment
-        // You might want to send a failure notification or retry logic
+        await notifyPaymentUpdate(payment.id, {
+          event: 'payment.failed',
+          status: 'failed',
+          reason: payment.failureReason
+        });
+        
         break;
         
       case 'payment.pending':
@@ -88,8 +118,11 @@ export async function POST(request: NextRequest) {
       case 'payment.expired':
         console.log(`⏰ Payment expired: ${payment.id}`);
         
-        // Handle expired payment
-        // Clean up any reservations or temporary holds
+        await notifyPaymentUpdate(payment.id, {
+          event: 'payment.expired',
+          status: 'expired'
+        });
+        
         break;
         
       default:
