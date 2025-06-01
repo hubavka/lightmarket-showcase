@@ -1,6 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 import { NakaPay } from "nakapay-sdk";
 
+// Cache business profile for app lifetime (until server restart)
+// Business lightning address rarely changes, so this is safe and efficient
+let cachedBusinessProfile: { lightningAddress: string } | null = null;
+
+async function getCachedBusinessProfile(nakaPayClient: any) {
+  // Return cached profile if available
+  if (cachedBusinessProfile) {
+    console.log('Using cached business profile:', cachedBusinessProfile.lightningAddress);
+    return cachedBusinessProfile;
+  }
+  
+  // Fetch fresh profile on first request or if cache was cleared
+  console.log('Fetching business profile (first time or cache miss)...');
+  try {
+    const businessProfile = await nakaPayClient.getBusinessProfile();
+    
+    if (!businessProfile.lightningAddress) {
+      throw new Error('No destination wallet configured for this business. Please set a Lightning address in your business profile.');
+    }
+    
+    // Cache the profile for app lifetime
+    cachedBusinessProfile = {
+      lightningAddress: businessProfile.lightningAddress
+    };
+    
+    console.log('Cached business profile for app lifetime:', cachedBusinessProfile.lightningAddress);
+    return cachedBusinessProfile;
+    
+  } catch (error) {
+    // If cached profile exists but API fails, use cached version
+    if (cachedBusinessProfile) {
+      console.log('API failed, falling back to cached profile:', cachedBusinessProfile.lightningAddress);
+      return cachedBusinessProfile;
+    }
+    // If no cache and API fails, re-throw error
+    throw error;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -28,17 +67,8 @@ export async function POST(request: NextRequest) {
       baseUrl: process.env.NEXT_PUBLIC_NAKAPAY_API_URL || 'https://api.nakapay.app'
     });
 
-    // Get business profile to use the configured destination wallet
-    const businessProfile = await nakaPayClient.getBusinessProfile();
-    
-    if (!businessProfile.lightningAddress) {
-      return NextResponse.json(
-        { message: 'No destination wallet configured for this business. Please set a Lightning address in your business profile.' },
-        { status: 400 }
-      );
-    }
-
-    console.log('Using business lightning address:', businessProfile.lightningAddress);
+    // Get cached business profile to avoid API delays that affect Ably timing
+    const businessProfile = await getCachedBusinessProfile(nakaPayClient);
 
     // Create payment using NakaPay SDK
     const payment = await nakaPayClient.createPaymentRequest({

@@ -74,25 +74,25 @@ export async function POST(request: NextRequest) {
     // Log webhook data for debugging
     console.log('NakaPay webhook received:', {
       event: body.event,
-      paymentId: body.payment?.id,
+      paymentId: body.payment_id, // Fix: NakaPay sends payment_id, not payment.id
       timestamp: new Date().toISOString()
     });
     
-    const { event, payment } = body;
+    const { event, payment_id, amount, description, metadata } = body;
     
     switch (event) {
       case 'payment.completed':
-        console.log(`✅ Payment completed: ${payment.id}`);
-        console.log(`Amount: ${payment.amount} sats`);
-        console.log(`Product: ${payment.metadata?.productName || 'Unknown'}`);
+        console.log(`✅ Payment completed: ${payment_id}`);
+        console.log(`Amount: ${amount} sats`);
+        console.log(`Product: ${metadata?.productName || 'Unknown'}`);
         
         // Notify connected clients about payment completion
-        await notifyPaymentUpdate(payment.id, {
+        await notifyPaymentUpdate(payment_id, {
           event: 'payment.completed',
           status: 'completed',
-          amount: payment.amount,
-          description: payment.description,
-          metadata: payment.metadata
+          amount: amount,
+          description: description,
+          metadata: metadata
         });
         
         // Here you would typically:
@@ -104,28 +104,28 @@ export async function POST(request: NextRequest) {
         break;
         
       case 'payment.failed':
-        console.log(`❌ Payment failed: ${payment.id}`);
-        console.log(`Reason: ${payment.failureReason || 'Unknown'}`);
+        console.log(`❌ Payment failed: ${payment_id}`);
+        console.log(`Reason: ${body.failure_reason || 'Unknown'}`);
         
-        await notifyPaymentUpdate(payment.id, {
+        await notifyPaymentUpdate(payment_id, {
           event: 'payment.failed',
           status: 'failed',
-          reason: payment.failureReason
+          reason: body.failure_reason
         });
         
         break;
         
       case 'payment.pending':
-        console.log(`⏳ Payment pending: ${payment.id}`);
+        console.log(`⏳ Payment pending: ${payment_id}`);
         
         // Handle pending payment
         // This is when the invoice is created but not yet paid
         break;
         
       case 'payment.expired':
-        console.log(`⏰ Payment expired: ${payment.id}`);
+        console.log(`⏰ Payment expired: ${payment_id}`);
         
-        await notifyPaymentUpdate(payment.id, {
+        await notifyPaymentUpdate(payment_id, {
           event: 'payment.expired',
           status: 'expired'
         });
