@@ -5,7 +5,7 @@ import { NakaPay } from "nakapay-sdk";
 // Business lightning address rarely changes, so this is safe and efficient
 let cachedBusinessProfile: { lightningAddress: string } | null = null;
 
-async function getCachedBusinessProfile(nakaPayClient: any) {
+async function getCachedBusinessProfile(nakaPayClient: NakaPay) {
   // Return cached profile if available
   if (cachedBusinessProfile) {
     console.log('Using cached business profile:', cachedBusinessProfile.lightningAddress);
