@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { NakaPayButton } from "nakapay-react";
 import { Product } from "@/lib/products";
+import { useNotifications } from "@/components/NotificationProvider";
 
 interface PaymentButtonProps {
   product: Product;
@@ -12,16 +13,33 @@ interface PaymentButtonProps {
 
 export default function PaymentButton({ product, className = "", disabled = false }: PaymentButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { addNotification } = useNotifications();
 
   const handlePaymentSuccess = (payment: { id: string; amount: number; metadata?: Record<string, unknown> }) => {
     console.log('Payment successful! Payment:', payment);
-    alert(`🎉 Payment Successful!\n\nPayment ID: ${payment.id}\nProduct: ${product.name}\n\nYour digital product is ready for download!`);
+    
+    // Show success notification instead of alert
+    addNotification({
+      type: 'success',
+      title: 'Payment Successful!',
+      message: `Your payment of ${payment.amount} sats for ${product.name} has been confirmed. Your digital product is ready!`,
+      duration: 7000 // Show for 7 seconds
+    });
+    
     setIsLoading(false);
   };
 
   const handlePaymentError = (error: Error) => {
     console.error('Payment failed:', error);
-    alert(`❌ Payment Failed: ${error.message}`);
+    
+    // Show error notification instead of alert
+    addNotification({
+      type: 'error',
+      title: 'Payment Failed',
+      message: error.message || 'The payment could not be completed. Please try again.',
+      duration: 10000 // Show errors longer
+    });
+    
     setIsLoading(false);
   };
 
@@ -59,7 +77,11 @@ export default function PaymentButton({ product, className = "", disabled = fals
       useAbly={true}
       ablyApiKey={process.env.NEXT_PUBLIC_ABLY_API_KEY}
       onPaymentCreated={handlePaymentCreated}
-      onPaymentSuccess={handlePaymentSuccess}
+      onPaymentSuccess={(payment) => {
+        // Handle success with notification
+        handlePaymentSuccess(payment);
+        // Note: Modal will auto-close via the nakapay-react component
+      }}
       onPaymentError={handlePaymentError}
     />
   );
