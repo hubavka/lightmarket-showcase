@@ -28,11 +28,23 @@ export async function POST(request: NextRequest) {
       baseUrl: process.env.NEXT_PUBLIC_NAKAPAY_API_URL || 'https://api.nakapay.app'
     });
 
+    // Get business profile to use the configured destination wallet
+    const businessProfile = await nakaPayClient.getBusinessProfile();
+    
+    if (!businessProfile.lightningAddress) {
+      return NextResponse.json(
+        { message: 'No destination wallet configured for this business. Please set a Lightning address in your business profile.' },
+        { status: 400 }
+      );
+    }
+
+    console.log('Using business lightning address:', businessProfile.lightningAddress);
+
     // Create payment using NakaPay SDK
     const payment = await nakaPayClient.createPaymentRequest({
       amount,
       description,
-      destinationWallet: "excitingunity556470@getalby.com",
+      destinationWallet: businessProfile.lightningAddress,
       metadata: {
         ...metadata,
         source: 'lightmarket-demo'

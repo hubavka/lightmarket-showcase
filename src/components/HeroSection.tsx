@@ -57,9 +57,7 @@ export default function HeroSection() {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Button clicked!'); // Debug log
               const productsSection = document.getElementById('products');
-              console.log('Products section found:', productsSection); // Debug log
               if (productsSection) {
                 productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
               } else {

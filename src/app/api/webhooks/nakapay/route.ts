@@ -55,7 +55,7 @@ function verifyWebhookSignature(
 export async function POST(request: NextRequest) {
   try {
     const rawBody = await request.text();
-    const signature = request.headers.get('x-webhook-signature') || '';
+    const signature = request.headers.get('x-nakapay-signature') || '';
     const webhookSecret = process.env.NAKAPAY_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
