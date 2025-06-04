@@ -40,10 +40,8 @@ export async function getBitcoinPrice(): Promise<number> {
     const response = await axios.get(
       'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
       {
-        timeout: 10000, // 10 second timeout
-        headers: {
-          'User-Agent': 'NakaPay-LightMarket/1.0'
-        }
+        timeout: 10000 // 10 second timeout
+        // Note: User-Agent header cannot be set in browser environment
       }
     );
 
