@@ -38,7 +38,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <span className="text-sm font-medium text-gray-500">{product.category}</span>
           <div className="flex items-center text-orange-600">
             <Zap className="mr-1 h-3 w-3" />
-            <span className="text-xs font-medium">{formatSats(product.priceInSats)} sats</span>
+            {product.priceInSats > 0 ? (
+              <span className="text-xs font-medium">{formatSats(product.priceInSats)} sats</span>
+            ) : (
+              <span className="text-xs font-medium text-red-600">Price N/A</span>
+            )}
           </div>
         </div>
         
@@ -64,10 +68,17 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-lg font-bold text-gray-900">{formatPrice(product.price)}</span>
-            <span className="text-xs text-gray-500">≈ {formatSats(product.priceInSats)} sats</span>
+            {product.priceInSats > 0 ? (
+              <span className="text-xs text-gray-500">≈ {formatSats(product.priceInSats)} sats</span>
+            ) : (
+              <span className="text-xs text-red-500">Price unavailable</span>
+            )}
           </div>
           
-          <PaymentButton product={product} />
+          <PaymentButton 
+            product={product} 
+            disabled={product.priceInSats === 0}
+          />
         </div>
       </div>
     </div>

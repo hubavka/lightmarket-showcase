@@ -67,7 +67,6 @@ export async function POST(request: NextRequest) {
       baseUrl: process.env.NEXT_PUBLIC_NAKAPAY_API_URL || 'https://api.nakapay.app'
     });
 
-    // Get cached business profile to avoid API delays that affect Ably timing
     const businessProfile = await getCachedBusinessProfile(nakaPayClient);
 
     // Create payment using NakaPay SDK

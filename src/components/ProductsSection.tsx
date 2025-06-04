@@ -1,17 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
-import { sampleProducts } from "@/lib/products";
+import { sampleProducts, getProductsWithCurrentSatsPrice, type Product } from "@/lib/products";
 
 export default function ProductsSection() {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [isLoadingPrices, setIsLoadingPrices] = useState(true);
+  const [priceError, setPriceError] = useState<string | null>(null);
   
-  const categories = ["All", ...Array.from(new Set(sampleProducts.map(p => p.category)))];
+  // Load products with current Bitcoin prices on mount
+  useEffect(() => {
+    const loadProductsWithCurrentPrices = async () => {
+      try {
+        setPriceError(null);
+        const updatedProducts = await getProductsWithCurrentSatsPrice();
+        setProducts(updatedProducts);
+      } catch (error) {
+        console.error('Failed to load current Bitcoin prices:', error);
+        setPriceError(error instanceof Error ? error.message : 'Failed to load Bitcoin prices');
+        // Keep the original products with 0 sats values - they won't be purchasable
+      } finally {
+        setIsLoadingPrices(false);
+      }
+    };
+
+    loadProductsWithCurrentPrices();
+  }, []);
+  
+  const categories = ["All", ...Array.from(new Set(products.map(p => p.category)))];
   
   const filteredProducts = selectedCategory === "All" 
-    ? sampleProducts 
-    : sampleProducts.filter(p => p.category === selectedCategory);
+    ? products 
+    : products.filter(p => p.category === selectedCategory);
 
   return (
     <section id="products" className="py-20 bg-gray-50">
@@ -23,6 +45,16 @@ export default function ProductsSection() {
           <p className="mx-auto max-w-2xl text-lg text-gray-600">
             Discover premium digital assets and experience lightning-fast payments. 
             All purchases are instant and global.
+            {isLoadingPrices && (
+              <span className="block text-sm text-orange-600 mt-2">
+                🔄 Loading current Bitcoin prices...
+              </span>
+            )}
+            {priceError && (
+              <span className="block text-sm text-red-600 mt-2">
+                ⚠️ {priceError}
+              </span>
+            )}
           </p>
         </div>
 
