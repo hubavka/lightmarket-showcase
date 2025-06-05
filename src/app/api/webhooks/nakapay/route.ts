@@ -17,13 +17,26 @@ async function notifyPaymentUpdate(paymentId: string, data: {
   try {
     const channel = ably.channels.get(`payment-${paymentId}`);
     
-    await channel.publish('payment-update', {
+    const payload = {
       paymentId,
-      ...data,
+      event: data.event,
+      status: data.status,
+      amount: data.amount,
+      description: data.description,
+      metadata: data.metadata,
+      reason: data.reason,
       timestamp: Date.now()
-    });
+    };
     
-    console.log(`📡 Sent Ably notification for payment ${paymentId}:`, data);
+    // Use payment-success for completed payments, as expected by nakapay-react
+    const eventName = data.event === 'payment.completed' ? 'payment-success' : 
+                     data.event === 'payment.failed' ? 'payment-failed' : 
+                     data.event === 'payment.expired' ? 'payment-expired' : 
+                     'payment-update';
+    
+    await channel.publish(eventName, payload);
+    
+    console.log(`📡 Sent Ably notification for payment ${paymentId} on channel 'payment-${paymentId}' with event '${eventName}':`, payload);
   } catch (error) {
     console.error('Failed to send Ably notification:', error);
   }
@@ -87,6 +100,8 @@ export async function POST(request: NextRequest) {
         console.log(`Product: ${metadata?.productName || 'Unknown'}`);
         
         // Notify connected clients about payment completion
+        console.log(`🔍 DEBUG: About to send Ably notification for payment ${payment_id}`);
+        console.log(`🔍 DEBUG: Channel will be: payment-${payment_id}`);
         await notifyPaymentUpdate(payment_id, {
           event: 'payment.completed',
           status: 'completed',
