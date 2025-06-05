@@ -99,6 +99,10 @@ export async function POST(request: NextRequest) {
         console.log(`Amount: ${amount} sats`);
         console.log(`Product: ${metadata?.productName || 'Unknown'}`);
         
+        // Add a small delay to ensure frontend has time to subscribe to Ably channel
+        console.log(`⏱️ Waiting 2 seconds before sending Ably notification...`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         // Notify connected clients about payment completion
         console.log(`🔍 DEBUG: About to send Ably notification for payment ${payment_id}`);
         console.log(`🔍 DEBUG: Channel will be: payment-${payment_id}`);
