@@ -61,6 +61,8 @@ export default function PaymentButton({ product, className = "", disabled = fals
     });
     console.log('🔊 Setting up Ably listener for payment:', payment.id);
     console.log('🔊 Ably API Key configured:', !!process.env.NEXT_PUBLIC_ABLY_API_KEY);
+    console.log('🔊 Expected channel name:', `payment-${payment.id}`);
+    console.log('🔊 Expected event name: payment-success');
     setIsLoading(true);
   };
 

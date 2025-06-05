@@ -102,6 +102,15 @@ export async function POST(request: NextRequest) {
         // Notify connected clients about payment completion
         console.log(`🔍 DEBUG: About to send Ably notification for payment ${payment_id}`);
         console.log(`🔍 DEBUG: Channel will be: payment-${payment_id}`);
+        console.log(`🔍 DEBUG: Event will be: payment-success`);
+        console.log(`🔍 DEBUG: Full payload:`, {
+          event: 'payment.completed',
+          status: 'completed',
+          amount: amount,
+          description: description,
+          metadata: metadata
+        });
+        
         await notifyPaymentUpdate(payment_id, {
           event: 'payment.completed',
           status: 'completed',
