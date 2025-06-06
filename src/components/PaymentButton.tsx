@@ -47,6 +47,7 @@ export default function PaymentButton({ product, className = "", disabled = fals
     metadata?: Record<string, unknown>;
     invoice?: string;
   }) => {
+    console.log('Payment created:', payment.id);
     setIsLoading(true);
   };
 
