@@ -36,7 +36,8 @@ async function notifyPaymentUpdate(paymentId: string, data: {
     
     await channel.publish(eventName, payload);
     
-    console.log(`📡 Sent Ably notification for payment ${paymentId} on channel 'payment-${paymentId}' with event '${eventName}':`, payload);
+    // Log successful notification
+    console.log(`📡 Payment notification sent: ${paymentId} -> ${eventName}`);
   } catch (error) {
     console.error('Failed to send Ably notification:', error);
   }
@@ -84,33 +85,16 @@ export async function POST(request: NextRequest) {
 
     const body = JSON.parse(rawBody);
     
-    // Log webhook data for debugging
-    console.log('NakaPay webhook received:', {
-      event: body.event,
-      paymentId: body.payment_id, // Fix: NakaPay sends payment_id, not payment.id
-      timestamp: new Date().toISOString()
-    });
+    // Log webhook receipt
+    console.log('NakaPay webhook:', body.event, body.payment_id);
     
     const { event, payment_id, amount, description, metadata } = body;
     
     switch (event) {
       case 'payment.completed':
-        console.log(`✅ Payment completed: ${payment_id}`);
-        console.log(`Amount: ${amount} sats`);
-        console.log(`Product: ${metadata?.productName || 'Unknown'}`);
+        console.log(`✅ Payment completed: ${payment_id} (${amount} sats)`);
         
         // Notify connected clients about payment completion
-        console.log(`🔍 DEBUG: About to send Ably notification for payment ${payment_id}`);
-        console.log(`🔍 DEBUG: Channel will be: payment-${payment_id}`);
-        console.log(`🔍 DEBUG: Event will be: payment-success`);
-        console.log(`🔍 DEBUG: Full payload:`, {
-          event: 'payment.completed',
-          status: 'completed',
-          amount: amount,
-          description: description,
-          metadata: metadata
-        });
-        
         await notifyPaymentUpdate(payment_id, {
           event: 'payment.completed',
           status: 'completed',
@@ -128,8 +112,7 @@ export async function POST(request: NextRequest) {
         break;
         
       case 'payment.failed':
-        console.log(`❌ Payment failed: ${payment_id}`);
-        console.log(`Reason: ${body.failure_reason || 'Unknown'}`);
+        console.log(`❌ Payment failed: ${payment_id} - ${body.failure_reason || 'Unknown reason'}`);
         
         await notifyPaymentUpdate(payment_id, {
           event: 'payment.failed',
@@ -157,7 +140,7 @@ export async function POST(request: NextRequest) {
         break;
         
       default:
-        console.log(`🔍 Unknown event: ${event}`);
+        console.log(`Unknown webhook event: ${event}`);
     }
     
     // Return 200 to acknowledge receipt

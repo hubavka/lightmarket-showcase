@@ -16,9 +16,6 @@ export default function PaymentButton({ product, className = "", disabled = fals
   const { addNotification } = useNotifications();
 
   const handlePaymentSuccess = (payment: { id: string; amount: number; metadata?: Record<string, unknown> }) => {
-    console.log('🎉 Payment successful! Payment:', payment);
-    console.log('🎉 nakapay-react component received success event');
-    
     // Show success notification instead of alert
     addNotification({
       type: 'success',
@@ -31,8 +28,7 @@ export default function PaymentButton({ product, className = "", disabled = fals
   };
 
   const handlePaymentError = (error: Error) => {
-    console.error('💥 Payment failed:', error);
-    console.error('💥 nakapay-react component received error event');
+    console.error('Payment failed:', error);
     
     // Show error notification instead of alert
     addNotification({
@@ -51,18 +47,6 @@ export default function PaymentButton({ product, className = "", disabled = fals
     metadata?: Record<string, unknown>;
     invoice?: string;
   }) => {
-    console.log('Payment created:', payment);
-    console.log('Invoice details:', {
-      id: payment.id,
-      hasInvoice: !!payment.invoice,
-      invoiceLength: payment.invoice?.length,
-      invoicePrefix: payment.invoice?.substring(0, 20),
-      invoiceValid: payment.invoice?.startsWith('lnbc')
-    });
-    console.log('🔊 Setting up Ably listener for payment:', payment.id);
-    console.log('🔊 Ably API Key configured:', !!process.env.NEXT_PUBLIC_ABLY_API_KEY);
-    console.log('🔊 Expected channel name:', `payment-${payment.id}`);
-    console.log('🔊 Expected event name: payment-success');
     setIsLoading(true);
   };
 

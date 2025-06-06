@@ -8,12 +8,10 @@ let cachedBusinessProfile: { lightningAddress: string } | null = null;
 async function getCachedBusinessProfile(nakaPayClient: NakaPay) {
   // Return cached profile if available
   if (cachedBusinessProfile) {
-    console.log('Using cached business profile:', cachedBusinessProfile.lightningAddress);
     return cachedBusinessProfile;
   }
   
   // Fetch fresh profile on first request or if cache was cleared
-  console.log('Fetching business profile (first time or cache miss)...');
   try {
     const businessProfile = await nakaPayClient.getBusinessProfile();
     
@@ -26,13 +24,12 @@ async function getCachedBusinessProfile(nakaPayClient: NakaPay) {
       lightningAddress: businessProfile.lightningAddress
     };
     
-    console.log('Cached business profile for app lifetime:', cachedBusinessProfile.lightningAddress);
+    console.log('Business profile cached:', cachedBusinessProfile.lightningAddress);
     return cachedBusinessProfile;
     
   } catch (error) {
     // If cached profile exists but API fails, use cached version
     if (cachedBusinessProfile) {
-      console.log('API failed, falling back to cached profile:', cachedBusinessProfile.lightningAddress);
       return cachedBusinessProfile;
     }
     // If no cache and API fails, re-throw error
@@ -80,23 +77,8 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('NakaPay API response:', {
-      id: payment.id,
-      amount: payment.amount,
-      invoiceLength: payment.invoice?.length,
-      invoicePrefix: payment.invoice?.substring(0, 20),
-      status: payment.status
-    });
+    console.log('Payment created:', payment.id, payment.status);
 
-    // Just log basic info without validation
-    if (payment.invoice) {
-      console.log('Invoice created successfully:', {
-        length: payment.invoice.length,
-        prefix: payment.invoice.substring(0, 10),
-        isLightningInvoice: payment.invoice.startsWith('lnbc') || payment.invoice.startsWith('lntb')
-      });
-    }
-    
     // Return the raw response from NakaPay API
     return NextResponse.json(payment);
 
