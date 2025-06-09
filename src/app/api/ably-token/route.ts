@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Generate token request with specific capabilities
     const tokenRequest = await ably.auth.createTokenRequest({
-      capabilities: {
+      capability: {
         [channelPattern]: ['subscribe'] // Only allow subscription to payment channels
       },
       ttl: 3600000, // 1 hour in milliseconds
