@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Ably from "ably";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Get Ably API key from server environment
     const ablyApiKey = process.env.ABLY_API_KEY;
