@@ -18,20 +18,29 @@ This sample application serves as a **complete reference implementation** for de
 
 ### 1. SDK Usage (Server-side)
 
-The application demonstrates proper **nakapay-sdk** usage for server-side payment processing:
+⚠️ **SECURITY UPDATE**: The SDK should only be used server-side with secure environment variables:
 
 ```typescript
 // lib/nakapay.ts
 import { NakaPay } from 'nakapay-sdk';
 
-// Initialize the SDK
-export const nakaPayClient = new NakaPay(
-  process.env.NEXT_PUBLIC_NAKAPAY_API_KEY,
-  { baseUrl: 'https://api.nakapay.app' }
-);
+// SECURE: Create client only in server-side functions
+export function createNakaPayClient(): NakaPay {
+  const apiKey = process.env.NAKAPAY_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('NAKAPAY_API_KEY environment variable is required');
+  }
 
-// Create payment requests
+  return new NakaPay(apiKey, {
+    baseUrl: process.env.NEXT_PUBLIC_NAKAPAY_API_URL || 'https://api.nakapay.app'
+  });
+}
+
+// Create payment requests (server-side only)
 export async function createPayment(product: Product) {
+  const nakaPayClient = createNakaPayClient();
+  
   const payment = await nakaPayClient.createPaymentRequest({
     amount: product.priceInSats,
     description: `${product.name} - ${product.description}`,
@@ -89,7 +98,8 @@ import { NakaPay } from "nakapay-sdk";
 export async function POST(request: NextRequest) {
   const { amount, description, metadata } = await request.json();
   
-  const nakaPayClient = new NakaPay(process.env.NEXT_PUBLIC_NAKAPAY_API_KEY);
+  // SECURE: Use server-side environment variable only
+  const nakaPayClient = new NakaPay(process.env.NAKAPAY_API_KEY);
   
   const payment = await nakaPayClient.createPaymentRequest({
     amount,
@@ -139,12 +149,14 @@ cp .env.example .env.local
 
 ### Environment Configuration
 
+⚠️ **SECURITY IMPORTANT**: Use correct environment variable names for security:
+
 ```bash
-# .env.local
-NEXT_PUBLIC_NAKAPAY_API_KEY=your-api-key-here
-NEXT_PUBLIC_NAKAPAY_API_URL=https://api.nakapay.app
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NAKAPAY_WEBHOOK_SECRET=your-webhook-secret
+# .env.local - SECURE CONFIGURATION
+NAKAPAY_API_KEY=your-api-key-here                    # SERVER-SIDE ONLY
+NAKAPAY_WEBHOOK_SECRET=your-webhook-secret           # SERVER-SIDE ONLY
+NEXT_PUBLIC_NAKAPAY_API_URL=https://api.nakapay.app  # Safe for client-side
+NEXT_PUBLIC_APP_URL=http://localhost:3000            # Safe for client-side
 ```
 
 ### Run Development Server
@@ -222,10 +234,14 @@ When deploying to production, configure your webhook URL in the NakaPay dashboar
 ### Environment Variables
 Set these in your production environment:
 ```bash
-NEXT_PUBLIC_NAKAPAY_API_KEY=your-production-api-key
-NEXT_PUBLIC_APP_URL=https://your-domain.com
-NAKAPAY_WEBHOOK_SECRET=your-webhook-secret
+# SECURE PRODUCTION CONFIGURATION
+NAKAPAY_API_KEY=your-production-api-key              # SERVER-SIDE ONLY
+NAKAPAY_WEBHOOK_SECRET=your-webhook-secret           # SERVER-SIDE ONLY
+NEXT_PUBLIC_APP_URL=https://your-domain.com          # Safe for client-side
+NEXT_PUBLIC_NAKAPAY_API_URL=https://api.nakapay.app  # Safe for client-side
 ```
+
+⚠️ **CRITICAL**: Never use `NEXT_PUBLIC_` prefix for API keys or secrets in production!
 
 ## 📚 Learn More
 

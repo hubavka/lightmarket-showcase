@@ -9,7 +9,7 @@ Please configure these settings in your NakaPay dashboard:
 
 ### Webhook Settings
 - **Webhook URL**: `https://lightmarket.nakapay.app/api/webhooks/nakapay`
-- **Webhook Secret**: `f43c8865-6284-4a4c-9e63-5f6f2be44192`
+- **Webhook Secret**: `your-webhook-secret-here` (set in environment variables)
 - **Events to Subscribe**: 
   - `payment.completed`
   - `payment.failed` 
@@ -22,12 +22,17 @@ Please configure these settings in your NakaPay dashboard:
 
 ## Environment Variables for Production
 ```bash
-NEXT_PUBLIC_NAKAPAY_API_KEY=c4c8a787-e59e-4c37-ad35-9d44db3ca42a
+# Server-side only (secure)
+NAKAPAY_API_KEY=your-production-api-key-here
+NAKAPAY_WEBHOOK_SECRET=your-webhook-secret-here
+
+# Client-side safe variables
 NEXT_PUBLIC_NAKAPAY_ENVIRONMENT=production
 NEXT_PUBLIC_NAKAPAY_API_URL=https://api.nakapay.app
 NEXT_PUBLIC_APP_URL=https://lightmarket.nakapay.app
-NAKAPAY_WEBHOOK_SECRET=f43c8865-6284-4a4c-9e63-5f6f2be44192
 ```
+
+⚠️ **SECURITY NOTICE**: Never use `NEXT_PUBLIC_` prefix for API keys or secrets as they become visible in the client-side JavaScript bundle.
 
 ## Deployment Steps
 1. Deploy to your hosting platform (Vercel, Netlify, etc.)

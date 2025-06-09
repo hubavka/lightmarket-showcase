@@ -1,12 +1,17 @@
 import { NakaPay } from 'nakapay-sdk';
 
-// Initialize NakaPay client with your API key
-export const nakaPayClient = new NakaPay(
-  process.env.NEXT_PUBLIC_NAKAPAY_API_KEY || 'c4c8a787-e59e-4c37-ad35-9d44db3ca42a',
-  {
-    baseUrl: process.env.NEXT_PUBLIC_NAKAPAY_API_URL || 'https://api.nakapay.app'
+// Helper function to create NakaPay client (server-side only)
+export function createNakaPayClient(): NakaPay {
+  const apiKey = process.env.NAKAPAY_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('NAKAPAY_API_KEY environment variable is required');
   }
-);
+
+  return new NakaPay(apiKey, {
+    baseUrl: process.env.NEXT_PUBLIC_NAKAPAY_API_URL || 'https://api.nakapay.app'
+  });
+}
 
 // Payment configuration
 export const paymentConfig = {
@@ -32,6 +37,8 @@ export async function createPayment(product: {
   status: string;
 }> {
   try {
+    const nakaPayClient = createNakaPayClient();
+    
     const payment = await nakaPayClient.createPaymentRequest({
       amount: product.priceInSats,
       description: `${product.name} - ${product.description}`,
@@ -61,6 +68,8 @@ export async function createPayment(product: {
 // Helper function to check payment status
 export async function checkPaymentStatus(paymentId: string) {
   try {
+    const nakaPayClient = createNakaPayClient();
+    
     const payment = await nakaPayClient.getPaymentRequest(paymentId);
     return {
       id: payment.id,

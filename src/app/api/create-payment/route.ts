@@ -50,12 +50,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_NAKAPAY_API_KEY;
+    const apiKey = process.env.NAKAPAY_API_KEY;
     if (!apiKey) {
-      console.error('NEXT_PUBLIC_NAKAPAY_API_KEY not configured');
+      console.error('NAKAPAY_API_KEY not configured');
       return NextResponse.json(
         { message: 'API key not configured' },
         { status: 500 }
+      );
+    }
+
+    // Validate input parameters
+    if (typeof amount !== 'number' || amount <= 0) {
+      return NextResponse.json(
+        { message: 'Amount must be a positive number' },
+        { status: 400 }
+      );
+    }
+
+    if (amount > 21000000 * 100000000) { // Max 21M BTC in sats
+      return NextResponse.json(
+        { message: 'Amount exceeds maximum allowed' },
+        { status: 400 }
+      );
+    }
+
+    if (typeof description !== 'string' || description.trim().length === 0) {
+      return NextResponse.json(
+        { message: 'Description must be a non-empty string' },
+        { status: 400 }
+      );
+    }
+
+    if (description.length > 500) {
+      return NextResponse.json(
+        { message: 'Description must be less than 500 characters' },
+        { status: 400 }
       );
     }
 

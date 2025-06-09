@@ -15,12 +15,20 @@ export async function GET(
       );
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_NAKAPAY_API_KEY;
+    const apiKey = process.env.NAKAPAY_API_KEY;
     if (!apiKey) {
-      console.error('NEXT_PUBLIC_NAKAPAY_API_KEY not configured');
+      console.error('NAKAPAY_API_KEY not configured');
       return NextResponse.json(
         { message: 'API key not configured' },
         { status: 500 }
+      );
+    }
+
+    // Validate payment ID format (basic validation)
+    if (typeof id !== 'string' || id.trim().length === 0) {
+      return NextResponse.json(
+        { message: 'Invalid payment ID format' },
+        { status: 400 }
       );
     }
 
