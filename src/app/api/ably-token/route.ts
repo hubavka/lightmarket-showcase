@@ -3,12 +3,46 @@ import Ably from "ably";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { paymentId, clientId } = body;
+    console.log('Ably token request received');
+    console.log('Content-Type:', request.headers.get('content-type'));
+    
+    let paymentId: string | undefined;
+    let clientId: string | undefined;
 
-    // We need a payment ID to create specific channel access
-    // If not provided, we'll create a more general token
-    const channelPattern = paymentId ? `payment-${paymentId}` : 'payment-*';
+    // Clone the request to avoid consumption issues
+    const requestClone = request.clone();
+    
+    // Try to parse JSON body first
+    const contentType = request.headers.get('content-type') || '';
+    
+    try {
+      if (contentType.includes('application/json')) {
+        const body = await request.json();
+        console.log('JSON body:', body);
+        paymentId = body.paymentId;
+        clientId = body.clientId;
+      } else {
+        // Try reading as text for form data
+        const bodyText = await requestClone.text();
+        console.log('Body text:', bodyText);
+        
+        if (bodyText) {
+          // Try parsing as URL encoded form data
+          const params = new URLSearchParams(bodyText);
+          paymentId = params.get('paymentId') || undefined;
+          clientId = params.get('clientId') || undefined;
+          console.log('Parsed params - paymentId:', paymentId, 'clientId:', clientId);
+        }
+      }
+    } catch (e) {
+      console.log('Request parsing error:', e);
+      // Continue without parameters - we'll create a general token
+    }
+
+    console.log('Final paymentId:', paymentId);
+
+    // Create a general pattern that works for any payment
+    const channelPattern = 'payment-*'; // Allow access to all payment channels
 
     // Get Ably API key from server environment
     const ablyApiKey = process.env.ABLY_API_KEY;
@@ -26,13 +60,14 @@ export async function POST(request: NextRequest) {
     // Generate token request with specific capabilities
     const tokenRequest = await ably.auth.createTokenRequest({
       capability: {
-        [channelPattern]: ['subscribe'] // Only allow subscription to payment channels
+        [channelPattern]: ['subscribe'] // Allow subscription to all payment channels
       },
       ttl: 3600000, // 1 hour in milliseconds
       clientId: clientId || undefined, // Optional client identification
     });
 
-    return NextResponse.json({ tokenRequest });
+    console.log('Token request generated successfully');
+    return NextResponse.json(tokenRequest);
 
   } catch (error) {
     console.error('Ably token generation error:', error);
