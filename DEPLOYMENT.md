@@ -30,9 +30,15 @@ NAKAPAY_WEBHOOK_SECRET=your-webhook-secret-here
 NEXT_PUBLIC_NAKAPAY_ENVIRONMENT=production
 NEXT_PUBLIC_NAKAPAY_API_URL=https://api.nakapay.app
 NEXT_PUBLIC_APP_URL=https://lightmarket.nakapay.app
+
+# Ably real-time notifications (server-side only for token generation)
+ABLY_API_KEY=your-ably-api-key-here
 ```
 
-⚠️ **SECURITY NOTICE**: Never use `NEXT_PUBLIC_` prefix for API keys or secrets as they become visible in the client-side JavaScript bundle.
+⚠️ **SECURITY NOTICE**: 
+- Never use `NEXT_PUBLIC_` prefix for NakaPay API keys, webhook secrets, or Ably API keys
+- All API keys are now kept server-side only for maximum security
+- Ably uses secure token authentication - no API keys are exposed to clients
 
 ## Deployment Steps
 1. Deploy to your hosting platform (Vercel, Netlify, etc.)

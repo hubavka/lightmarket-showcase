@@ -10,9 +10,16 @@ export default function AblyDebugListener({ paymentId }: { paymentId: string }) 
   useEffect(() => {
     // Only show debug listener in development mode
     if (process.env.NODE_ENV !== 'development') return;
-    if (!paymentId || !process.env.NEXT_PUBLIC_ABLY_API_KEY) return;
+    if (!paymentId) return;
 
-    const client = new Ably.Realtime(process.env.NEXT_PUBLIC_ABLY_API_KEY);
+    // Use token authentication instead of exposed API key
+    const client = new Ably.Realtime({
+      authUrl: '/api/ably-token',
+      authMethod: 'POST',
+      authHeaders: { 'Content-Type': 'application/json' },
+      authParams: { paymentId }
+    });
+    
     const channel = client.channels.get(`payment-${paymentId}`);
 
     client.connection.on('connected', () => {
