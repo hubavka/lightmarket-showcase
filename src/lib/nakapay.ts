@@ -42,7 +42,7 @@ export async function createPayment(product: {
     const payment = await nakaPayClient.createPaymentRequest({
       amount: product.priceInSats,
       description: `${product.name} - ${product.description}`,
-      destinationWallet: "excitingunity556470@getalby.com", // Configure this as needed
+      destinationWallet: "nakapay@getalby.com", // Configure this as needed
       metadata: {
         productId: product.id,
         productName: product.name,
