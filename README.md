@@ -41,10 +41,13 @@ export function createNakaPayClient(): NakaPay {
 export async function createPayment(product: Product) {
   const nakaPayClient = createNakaPayClient();
   
+  // Get business profile to determine destination wallet
+  const businessProfile = await nakaPayClient.getBusinessProfile();
+  
   const payment = await nakaPayClient.createPaymentRequest({
     amount: product.priceInSats,
     description: `${product.name} - ${product.description}`,
-    destinationWallet: "your-lightning-address@getalby.com",
+    destinationWallet: businessProfile.lightningAddress,
     metadata: {
       productId: product.id,
       productName: product.name,
@@ -101,10 +104,13 @@ export async function POST(request: NextRequest) {
   // SECURE: Use server-side environment variable only
   const nakaPayClient = new NakaPay(process.env.NAKAPAY_API_KEY);
   
+  // Get business profile to determine destination wallet
+  const businessProfile = await nakaPayClient.getBusinessProfile();
+  
   const payment = await nakaPayClient.createPaymentRequest({
     amount,
     description,
-    destinationWallet: "your-wallet@getalby.com",
+    destinationWallet: businessProfile.lightningAddress,
     metadata
   });
   
