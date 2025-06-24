@@ -94,7 +94,6 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    // Next.js converts all headers to lowercase, so we need to look for the lowercase version
     const signature = request.headers.get('x-nakapay-signature') || '';
     console.log('🔑 Signature found:', signature ? `Yes (${signature.substring(0, 20)}...)` : 'No');
     
@@ -108,74 +107,11 @@ export async function POST(request: NextRequest) {
     // Verify webhook signature
     if (!verifyWebhookSignature(rawBody, signature, webhookSecret)) {
       console.error('❌ Invalid webhook signature');
-      
-      // Try to parse and re-stringify to see if that helps
-      try {
-        const parsed = JSON.parse(rawBody);
-        const reStringified = JSON.stringify(parsed);
-        if (verifyWebhookSignature(reStringified, signature, webhookSecret)) {
-          console.log('✅ Signature verified with re-stringified body');
-          // Continue with the parsed body
-          const body = parsed;
-          
-          // Log webhook receipt with full details
-          console.log('✅ NakaPay webhook received:', body.event, body.payment_id);
-          console.log('📦 Webhook payload:', JSON.stringify(body, null, 2));
-          
-          const { event, payment_id, amount, description, metadata } = body;
-          
-          switch (event) {
-            case 'payment.completed':
-              console.log(`✅ Payment completed: ${payment_id} (${amount} sats)`);
-              
-              // Notify connected clients about payment completion
-              await notifyPaymentUpdate(payment_id, {
-                event: 'payment.completed',
-                status: 'completed',
-                amount: amount,
-                description: description,
-                metadata: metadata
-              });
-              break;
-              
-            case 'payment.failed':
-              console.log(`❌ Payment failed: ${payment_id} - ${body.failure_reason || 'Unknown reason'}`);
-              
-              await notifyPaymentUpdate(payment_id, {
-                event: 'payment.failed',
-                status: 'failed',
-                reason: body.failure_reason
-              });
-              break;
-              
-            case 'payment.pending':
-              console.log(`⏳ Payment pending: ${payment_id}`);
-              break;
-              
-            case 'payment.expired':
-              console.log(`⏰ Payment expired: ${payment_id}`);
-              
-              await notifyPaymentUpdate(payment_id, {
-                event: 'payment.expired',
-                status: 'expired'
-              });
-              break;
-              
-            default:
-              console.log(`Unknown webhook event: ${event}`);
-          }
-          
-          return new NextResponse('OK', { status: 200 });
-        }
-      } catch (e) {
-        console.error('Failed to parse/re-stringify body:', e);
-      }
-      
-      console.error('Expected signature for raw body:', rawBody.substring(0, 100) + '...');
+      console.error('Expected signature for body:', rawBody.substring(0, 100) + '...');
       return new NextResponse('Invalid signature', { status: 401 });
     }
 
-    console.log('✅ Webhook signature verified with raw body');
+    console.log('✅ Webhook signature verified');
     const body = JSON.parse(rawBody);
     
     // Log webhook receipt with full details
