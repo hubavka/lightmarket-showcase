@@ -3,12 +3,6 @@ import crypto from "crypto";
 import Ably from "ably";
 
 // Initialize Ably client
-const ablyApiKey = process.env.ABLY_API_KEY;
-if (!ablyApiKey) {
-  console.error('⚠️ ABLY_API_KEY is not configured in environment variables');
-} else {
-  console.log('✅ Ably API key found');
-}
 const ably = new Ably.Rest(process.env.ABLY_API_KEY!);
 
 // Real-time notification function using Ably
@@ -21,10 +15,7 @@ async function notifyPaymentUpdate(paymentId: string, data: {
   reason?: string;
 }) {
   try {
-    const channelName = `payment-${paymentId}`;
-    console.log(`📡 Starting Ably notification for channel: ${channelName}`);
-    
-    const channel = ably.channels.get(channelName);
+    const channel = ably.channels.get(`payment-${paymentId}`);
     
     const payload = {
       paymentId,
@@ -43,16 +34,12 @@ async function notifyPaymentUpdate(paymentId: string, data: {
                      data.event === 'payment.expired' ? 'payment-expired' : 
                      'payment-update';
     
-    console.log(`📡 Publishing Ably event: ${eventName} to channel: ${channelName}`);
-    console.log(`📡 Ably payload:`, JSON.stringify(payload, null, 2));
-    
     await channel.publish(eventName, payload);
     
     // Log successful notification
-    console.log(`✅ Ably notification sent successfully: ${paymentId} -> ${eventName} on channel ${channelName}`);
+    console.log(`📡 Payment notification sent: ${paymentId} -> ${eventName}`);
   } catch (error) {
-    console.error('❌ Failed to send Ably notification:', error);
-    console.error('Error details:', error);
+    console.error('Failed to send Ably notification:', error);
   }
 }
 
@@ -81,22 +68,8 @@ function verifyWebhookSignature(
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔔 Webhook endpoint called');
-    
     const rawBody = await request.text();
-    console.log('📄 Raw body received (first 200 chars):', rawBody.substring(0, 200));
-    
-    // Log all headers for debugging
-    console.log('📋 Webhook headers received:');
-    request.headers.forEach((value, key) => {
-      if (key.toLowerCase().includes('signature') || key.toLowerCase().includes('nakapay')) {
-        console.log(`  ${key}: ${value}`);
-      }
-    });
-    
     const signature = request.headers.get('x-nakapay-signature') || '';
-    console.log('🔑 Signature found:', signature ? `Yes (${signature.substring(0, 20)}...)` : 'No');
-    
     const webhookSecret = process.env.NAKAPAY_WEBHOOK_SECRET;
 
     if (!webhookSecret) {
@@ -106,17 +79,14 @@ export async function POST(request: NextRequest) {
 
     // Verify webhook signature
     if (!verifyWebhookSignature(rawBody, signature, webhookSecret)) {
-      console.error('❌ Invalid webhook signature');
-      console.error('Expected signature for body:', rawBody.substring(0, 100) + '...');
+      console.error('Invalid webhook signature');
       return new NextResponse('Invalid signature', { status: 401 });
     }
 
-    console.log('✅ Webhook signature verified');
     const body = JSON.parse(rawBody);
     
-    // Log webhook receipt with full details
-    console.log('✅ NakaPay webhook received:', body.event, body.payment_id);
-    console.log('📦 Webhook payload:', JSON.stringify(body, null, 2));
+    // Log webhook receipt
+    console.log('NakaPay webhook:', body.event, body.payment_id);
     
     const { event, payment_id, amount, description, metadata } = body;
     
