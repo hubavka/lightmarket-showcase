@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import Ably from "ably";
 
-// Initialize Ably client
-const ably = new Ably.Rest(process.env.ABLY_API_KEY!);
+// Lazy-initialize Ably client to avoid build-time errors
+function getAblyClient() {
+  if (!process.env.ABLY_API_KEY) {
+    throw new Error('ABLY_API_KEY environment variable is not set');
+  }
+  return new Ably.Rest(process.env.ABLY_API_KEY);
+}
 
 // Real-time notification function using Ably
 async function notifyPaymentUpdate(paymentId: string, data: {
@@ -15,6 +20,7 @@ async function notifyPaymentUpdate(paymentId: string, data: {
   reason?: string;
 }) {
   try {
+    const ably = getAblyClient();
     const channel = ably.channels.get(`payment-${paymentId}`);
     
     const payload = {
